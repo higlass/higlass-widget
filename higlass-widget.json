@@ -1,0 +1,5 @@
+{
+  "load_extensions": {
+    "higlass-widget/extension": true
+  }
+}
