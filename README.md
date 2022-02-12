@@ -1,5 +1,10 @@
 # higlass-widget
 
+[![PyPI](https://img.shields.io/pypi/v/higlass-widget.svg?color=green)](https://pypi.org/project/higlass-widget)
+[![License](https://img.shields.io/pypi/l/gosling.svg?color=green)](https://github.com/higlass/higlass-widget/raw/main/LICENSE)
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/higlass/higlass-widget/blob/main/notebooks/Widget.ipynb)
+
+
 ```
 pip install higlass-widget
 ```
