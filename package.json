@@ -1,16 +1,16 @@
 {
   "name": "higlass-widget",
-  "version": "0.0.0",
-  "main": "src/widget.js",
+  "version": "0.0.2",
+  "main": "src/index.js",
   "files": [
     "dist"
   ],
   "scripts": {
     "build": "run-p build:nb build:lab",
-    "build:nb": "esbuild --bundle --format=esm --outdir=./higlass_widget/nbextension/ src/widget.js",
+    "build:nb": "esbuild --format=esm --bundle --minify --loader:.css=text --outfile=./higlass_widget/nbextension/index.js src/index.js",
     "build:lab": "jupyter labextension build .",
     "clean": "run-p clean:nb clean:lab",
-    "clean:nb": "rimraf higlass_widget/nbextension/widget.{js,css}",
+    "clean:nb": "rimraf higlass_widget/nbextension/index.js",
     "clean:lab": "rimraf higlass_widget/labextension/static/ && rimraf higlass_widget/labextension/package.json",
     "copy-dist": "mkdir -p dist && cp higlass_widget/nbextension/* dist",
     "prepack": "run-s build:nb copy-dist"

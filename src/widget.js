@@ -1,8 +1,6 @@
 import * as hglib from "higlass";
 import { name, version } from "../package.json"
 
-import "higlass/dist/hglib.css";
-
 /**
  * @param {{
  *   xDomain: [number, number],
@@ -80,5 +78,3 @@ export default function(base) {
 
 	return { HiGlassModel, HiGlassView };
 }
-
-

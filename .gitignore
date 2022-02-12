@@ -9,9 +9,7 @@ higlass_widget/_version.py
 
 node_modules/
 
-higlass_widget/nbextension/widget.js
-higlass_widget/nbextension/widget.css
-
+higlass_widget/nbextension/index.js
 higlass_widget/labextension/package.json
 higlass_widget/labextension/static/*
 
