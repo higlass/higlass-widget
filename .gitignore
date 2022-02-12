@@ -14,3 +14,4 @@ higlass_widget/labextension/package.json
 higlass_widget/labextension/static/*
 
 dist/
+dist-python/

@@ -11,7 +11,7 @@ with (here / "package.json").open() as f:
 
 # representative files that should exist after build
 targets = [
-    str(here / "higlass_widget" / "nbextension" / "widget.js"),
+    str(here / "higlass_widget" / "nbextension" / "index.js"),
     str(here / "higlass_widget" / "labextension" / "package.json"),
 ]
 
