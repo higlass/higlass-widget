@@ -35,6 +35,11 @@ jobs:
           pip install build twine
           pip install . # will build js deps
 
+      - name: Build and publish to NPM
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+        run: npm publish
+
       - name: Build and publish Python
         env:
           TWINE_USERNAME: __token__
@@ -43,8 +48,3 @@ jobs:
           git tag
           python -m build --outdir dist-python .
           twine upload dist-python/*
-
-      - name: Build and publish to NPM
-        env:
-          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
-        run: npm publish
