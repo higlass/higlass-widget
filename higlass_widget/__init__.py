@@ -1,6 +1,5 @@
 import sys
 
-from ._version import version as __version__
 from .widget import HiGlassWidget
 
 try:
