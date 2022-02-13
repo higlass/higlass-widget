@@ -5,6 +5,4 @@ const style = document.createElement('style');
 style.textContent = css;
 document.head.appendChild(style);
 
-define(["@jupyter-widgets/base"], function (base) {
-	return create(base);
-})
+define(["@jupyter-widgets/base"], create);
