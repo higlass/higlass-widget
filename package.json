@@ -7,13 +7,11 @@
   ],
   "scripts": {
     "build": "run-p build:nb build:lab",
-    "build:nb": "esbuild --format=esm --bundle --minify --loader:.css=text --outfile=./higlass_widget/nbextension/index.js src/index.js",
+    "build:nb": "npm run bundle -- --outfile=higlass_widget/nbextension/index.js",
     "build:lab": "jupyter labextension build .",
-    "clean": "run-p clean:nb clean:lab",
-    "clean:nb": "rimraf higlass_widget/nbextension/index.js",
-    "clean:lab": "rimraf higlass_widget/labextension/static/ && rimraf higlass_widget/labextension/package.json",
-    "copy-dist": "mkdir -p dist && cp higlass_widget/nbextension/* dist",
-    "prepack": "run-s build:nb copy-dist"
+    "bundle": "esbuild --format=esm --bundle --minify --loader:.css=text src/index.js",
+    "clean": "rimraf higlass_widget/nbextension/index.js higlass_widget/labextension/",
+    "prepack": "rimraf dist && npm run bundle -- --outfile=dist/index.js"
   },
   "keywords": [],
   "jupyterlab": {
@@ -31,12 +29,12 @@
     "@jupyterlab/builder": "^3.2.9",
     "css-loader": "^6.6.0",
     "esbuild": "^0.14.21",
+    "npm-run-all": "^4.1.5",
     "rimraf": "^3.0.2",
     "style-loader": "^3.3.1"
   },
   "dependencies": {
     "higlass": "^1.11.9",
-    "npm-run-all": "^4.1.5",
     "pixi.js": "^6.2.2",
     "react": "^17.0.2",
     "react-dom": "^17.0.2"
