@@ -6,7 +6,7 @@ from jupyter_packaging import get_data_files, npm_builder, wrap_installers
 
 here = Path(__file__).parent.resolve()
 
-with (here / "package.json").open() as f:
+with open(here / "package.json") as f:
     version = json.load(f)["version"]
 
 # representative files that should exist after build
