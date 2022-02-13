@@ -1,9 +1,7 @@
 import sys
 
-try:
-    from ._version import version as __version__
-except ImportError:
-    __version__ = "unknown"
+from ._version import version as __version__
+from .widget import HiGlassWidget
 
 try:
     if "google.colab" in sys.modules:
@@ -12,8 +10,6 @@ try:
         output.enable_custom_widget_manager()
 except ImportError:
     pass
-
-from .widget import HiGlassWidget
 
 
 def _jupyter_labextension_paths():
