@@ -32,3 +32,12 @@ For developing with JupyterLab:
 ```
 jupyter labextension develop --overwrite higlass_widget
 ```
+
+
+### Release
+
+```
+npm version [major|minor|patch]
+git tag -a vX.X.X -m "vX.X.X"
+git push --follow-tags
+```
