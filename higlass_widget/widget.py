@@ -4,8 +4,6 @@ import pathlib
 import ipywidgets
 import traitlets.traitlets as t
 
-import hg.utils as utils
-
 here = pathlib.Path(__file__).parent
 
 with open(here / "labextension" / "package.json") as f:
@@ -62,8 +60,7 @@ class HiGlassWidget(ipywidgets.DOMWidget):
         self.callbacks = {}
         super().__init__(viewconf=viewconf, **kwargs)
 
-    def get_base64_img(self, callback):
-        uuid = utils.uid()
+    def get_base64_img(self, uuid, callback):
 
         self.callbacks[uuid] = callback
 
