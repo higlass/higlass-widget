@@ -1,26 +1,20 @@
 import json
-import pathlib
 from typing import Any, Dict
 
 import ipywidgets
 import traitlets.traitlets as t
 
-here = pathlib.Path(__file__).parent
-
-with open(here / "labextension" / "package.json") as f:
-    pkg = json.load(f)
-
-version = pkg["version"]
+from ._version import __version__
 
 
 class HiGlassWidget(ipywidgets.DOMWidget):
     _model_name = t.Unicode("HiGlassModel").tag(sync=True)
     _model_module = t.Unicode("higlass-widget").tag(sync=True)
-    _model_module_version = t.Unicode(version).tag(sync=True)
+    _model_module_version = t.Unicode(__version__).tag(sync=True)
 
     _view_name = t.Unicode("HiGlassView").tag(sync=True)
     _view_module = t.Unicode("higlass-widget").tag(sync=True)
-    _view_module_version = t.Unicode(version).tag(sync=True)
+    _view_module_version = t.Unicode(__version__).tag(sync=True)
 
     _viewconf = t.Unicode("null").tag(sync=True)
 
