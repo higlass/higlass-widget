@@ -1,80 +1,291 @@
-import * as hglib from "higlass";
-import { name, version } from "../package.json"
-
-/**
- * @param {{
- *   xDomain: [number, number],
- *   yDomain: [number, number],
- * }} location
- */
-function toPts({ xDomain, yDomain }) {
-	let [x, xe] = xDomain;
-	let [y, ye] = yDomain;
-	return [x, xe, y, ye];
-}
+// @ts-check
+import * as hglib from 'higlass';
+import { name, version } from '../package.json';
 
 /** @param {typeof import("@jupyter-widgets/base")} base */
-export default function(base) {
+export default function (base) {
+  console.log('here')
+  class HiGlassModel extends base.DOMWidgetModel {
+    defaults() {
+      return {
+        ...super.defaults(),
 
-	class HiGlassModel extends base.DOMWidgetModel {
-		defaults() {
-			return {
-				...super.defaults(),
+        _model_name: HiGlassModel.model_name,
+        _model_module: HiGlassModel.model_module,
+        _model_module_version: HiGlassModel.model_module_version,
 
-				_model_name: HiGlassModel.model_name,
-				_model_module: HiGlassModel.model_module,
-				_model_module_version: HiGlassModel.model_module_version,
+        _view_name: HiGlassView.view_name,
+        _view_module: HiGlassView.view_module,
+        _view_module_version: HiGlassView.view_module_version,
+      };
+    }
 
-				_view_name: HiGlassView.view_name,
-				_view_module: HiGlassView.view_module,
-				_view_module_version: HiGlassView.view_module_version,
-			};
-		}
+    static model_name = 'HiGlassModel';
+    static model_module = name;
+    static model_module_version = version;
 
-		static model_name = 'HiGlassModel';
-		static model_module = name;
-		static model_module_version = version;
+    static view_name = 'HiGlassView';
+    static view_module = name;
+    static view_module_version = version;
+  }
 
-		static view_name = 'HiGlassView';
-		static view_module = name;
-		static view_module_version = version;
-	}
+  class HiGlassView extends base.DOMWidgetView {
+    render() {
+      this.height = this.model.get('height');
+      this.viewConfig = this.model.get('viewconf');
+      this.authToken = this.model.get('auth_token');
+      this.bounded = this.model.get('bounded');
+      this.defaultTrackOptions = this.model.get('default_track_options');
+      this.darkMode = this.model.get('dark_mode');
+      this.renderer = this.model.get('renderer');
+      this.selectMode = this.model.get('select_mode');
+      this.selectionOnAlt = this.model.get('selection_on_alt');
+      this.options = this.model.get('options');
 
-	class HiGlassView extends base.DOMWidgetView {
+      // Create a random 6-letter string
+      // From https://gist.github.com/6174/6062387
+      var randomStr = (
+        Math.random().toString(36).substring(2, 5) +
+        Math.random().toString(36).substring(2, 5)
+      );
+      this.model.set('dom_element_id', randomStr);
 
-		async render() {
-			let viewconf = JSON.parse(this.model.get("_viewconf"));
-			let api = await hglib.viewer(this.el, viewconf);
+      this.hgContainer = document.createElement('div');
+      this.hgContainer.setAttribute('id', randomStr);
+      this.hgDisplay = document.createElement('div');
+      this.hgDisplay.style.border = this.options.theme === 'dark'
+        ? '#333333'
+        : '#dddddd';
+      this.hgDisplay.style.borderRadius = '2px';
 
-			this.model.on('msg:custom', msg => {
-				msg = JSON.parse(msg);
-				let [fn, ...args] = msg;
-				api[fn](...args);
-			});
+      this.hgContainer.appendChild(this.hgDisplay);
+      this.el.appendChild(this.hgContainer);
 
-			if (viewconf.views.length === 1) {
+      this.hg = hglib.viewer(
+        this.hgDisplay,
+        this.viewConfig,
+        this.getOptions(),
+      );
 
-				api.on('location', loc => {
-					this.model.set('location', toPts(loc))
-					this.model.save_changes();
-				}, viewconf.views[0].uid);
+      this.hgContainer.api = this.hg;
 
-			} else {
+      // Listen to events from the JavaScript world
+      this.hg.on('cursorLocation', this.setCursorLocation.bind(this));
+      this.hg.on('rangeSelection', this.setSelection.bind(this));
+      this.hg.on('viewConfig', this.setViewConfig.bind(this));
 
-				viewconf.views.forEach((view, idx) => {
-					api.on('location', loc => {
-						let copy = this.model.get('location').slice();
-						copy[idx] = toPts(loc);
-						this.model.set('location', copy);
-						this.model.save_changes();
-					}, view.uid);
-				});
+      this.locationListeners = [];
+      this.setupLocationListeners();
 
-			}
+      // Listen to messages from the Python world
+      this.model.on('change:height', this.handleChange, this);
+      this.model.on('change:select_mode', this.handleChange, this);
+      this.model.on('change:viewconf', this.handleChange, this);
+      this.model.on('change:auth_token', this.handleChange, this);
+      this.model.on('change:bounded', this.handleChange, this);
+      this.model.on('change:default_track_options', this.handleChange, this);
+      this.model.on('change:dark_mode', this.handleChange, this);
+      this.model.on('change:renderer', this.handleChange, this);
+      this.model.on('change:select_mode', this.handleChange, this);
+      this.model.on('change:selection_on_alt', this.handleChange, this);
+      this.model.on('msg:custom', this.customEventHandler, this);
+    }
 
-		}
+    async customEventHandler(msg) {
+      const msgJson = JSON.parse(msg);
 
-	}
+      console.log('msgJson:', msgJson);
 
-	return { HiGlassModel, HiGlassView };
+      this.hg.exportAsPngBlobPromise().then((blob) => {
+        let reader = new FileReader();
+        reader.readAsDataURL(blob);
+        reader.onloadend = () => {
+          let base64data = reader.result;
+          this.model.send({
+            imgData: base64data,
+            request: msgJson.request,
+            params: msgJson.params,
+          });
+        };
+      });
+
+      if (msgJson.request === 'save_as_png') {
+        this.model.send({
+          'params': msgJson.params,
+        });
+      }
+    }
+
+    getOptions() {
+      return Object.assign({}, this.options, {
+        authToken: this.authToken,
+        // user hasn't specified `bounded` but provided a height so we set
+        // bounded to `true`
+        bounded: this.height && this.bounded === null ? true : this.bounded,
+        defaultTrackOptions: this.defaultTrackOptions,
+        rangeSelectionOnAlt: this.selectionOnAlt,
+        renderer: this.renderer,
+        theme: this.darkMode ? 'dark' : 'light',
+      });
+    }
+
+    setupLocationListeners() {
+      function removeLocationListener(locationListener) {
+        this.hg.off('location', locationListener);
+      }
+      this.locationListeners.forEach(removeLocationListener.bind(this));
+      this.locationListeners = [];
+      function addLocationListener(view, index) {
+        this.locationListeners.push(this.hg.on(
+          'location',
+          this.setLocation(index, this.viewConfig.views.length === 1),
+          view.uid,
+        ));
+      }
+      this.viewConfig.views.forEach(addLocationListener.bind(this));
+    }
+
+    setCursorLocation(cursorLocation) {
+      this.model.set('cursor_location', [
+        cursorLocation.dataX,
+        cursorLocation.dataY,
+      ]);
+      this.model.save_changes();
+    }
+
+    setLocation(index, onlyOneView) {
+      function setLocation(location) {
+        var loc = [
+          location.xDomain[0],
+          location.xDomain[1],
+          location.yDomain[0],
+          location.yDomain[1],
+        ];
+        if (!onlyOneView) {
+          var currentLocations = this.model.get('location').slice();
+          currentLocations[index] = loc;
+          loc = currentLocations;
+        }
+        this.model.set('location', loc);
+        this.model.save_changes();
+      }
+      return setLocation.bind(this);
+    }
+
+    setSelection(selection) {
+      this.model.set('selection', [
+        selection.dataRange[0] && selection.dataRange[0][0],
+        selection.dataRange[0] && selection.dataRange[0][1],
+        selection.dataRange[1] && selection.dataRange[1][0],
+        selection.dataRange[1] && selection.dataRange[1][1],
+      ]);
+      this.model.save_changes();
+    }
+
+    setViewConfig(viewConfigString) {
+      this.viewConfig = JSON.parse(viewConfigString);
+      this.model.set('viewconf', this.viewConfig);
+      // We need this to avoid cyclic updates because `this.handleChange` will be
+      // called next. The downside of 2-way data binding.
+      this.viewconfChanged = true;
+      this.model.save_changes();
+    }
+
+    handleChange() {
+      var self = this;
+      var changes = this.model.changedAttributes();
+      Object.keys(changes).forEach(function (key) {
+        var value = changes[key];
+        switch (key) {
+          case 'height':
+            self.height = value;
+            self.hgDisplay.style.height = self.height + 'px';
+            break;
+
+          case 'auth_token':
+            self.authToken = value;
+            self.hg = hglib.viewer(
+              self.hgDisplay,
+              self.viewConfig,
+              self.getOptions(),
+            );
+            break;
+
+          case 'bounded':
+            self.bounded = value;
+            self.hg = hglib.viewer(
+              self.hgDisplay,
+              self.viewConfig,
+              self.getOptions(),
+            );
+            break;
+
+          case 'default_track_options':
+            self.defaultTrackOptions = value;
+            self.hg = hglib.viewer(
+              self.hgDisplay,
+              self.viewConfig,
+              self.getOptions(),
+            );
+            break;
+
+          case 'dark_mode':
+            self.darkMode = value;
+            self.hg = hglib.viewer(
+              self.hgDisplay,
+              self.viewConfig,
+              self.getOptions(),
+            );
+            break;
+
+          case 'renderer':
+            self.renderer = value;
+            self.hg = hglib.viewer(
+              self.hgDisplay,
+              self.viewConfig,
+              self.getOptions(),
+            );
+            break;
+
+          case 'selection_on_alt':
+            self.selectionOnAlt = value;
+            self.hg = hglib.viewer(
+              self.hgDisplay,
+              self.viewConfig,
+              self.getOptions(),
+            );
+            break;
+
+          case 'options':
+            self.options = value;
+            self.hg = hglib.viewer(
+              self.hgDisplay,
+              self.viewConfig,
+              self.getOptions(),
+            );
+            break;
+
+          case 'select_mode':
+            self.hg.activateTool(value && 'select');
+            break;
+
+          case 'viewconf':
+            if (!self.viewconfChanged) {
+              self.viewConfig = typeof value === 'string'
+                ? JSON.parse(value)
+                : value;
+              self.hg.setViewConfig(self.viewConfig);
+            }
+            break;
+
+          default:
+            console.warn('Unknown attribute', key);
+            break;
+        }
+      });
+      this.viewconfChanged = false;
+    }
+  }
+
+  return { HiGlassModel, HiGlassView };
 }
