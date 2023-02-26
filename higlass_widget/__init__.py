@@ -1,27 +1,8 @@
-import sys
-
-from ._version import __version__
-from .widget import HiGlassWidget
+import importlib.metadata
 
 try:
-    if "google.colab" in sys.modules:
-        from google.colab import output
+    __version__ = importlib.metadata.version("higlass-widget")
+except importlib.metadata.PackageNotFoundError:
+    __version__ = "unknown"
 
-        output.enable_custom_widget_manager()
-except ImportError:
-    pass
-
-
-def _jupyter_labextension_paths():
-    return [{"src": "labextension", "dest": "higlass-widget"}]
-
-
-def _jupyter_nbextension_paths():
-    return [
-        {
-            "section": "notebook",
-            "src": "nbextension",
-            "dest": "higlass-widget",
-            "require": "higlass-widget/extension",
-        }
-    ]
+from .widget import HiGlassWidget
