@@ -5,4 +5,4 @@ try:
 except importlib.metadata.PackageNotFoundError:
     __version__ = "unknown"
 
-from .widget import HiGlassWidget
+from .widget import HiGlassWidget  # noqa
