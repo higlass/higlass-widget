@@ -7,8 +7,8 @@ import traitlets as t
 
 
 class HiGlassWidget(anywidget.AnyWidget):
-    _esm = (pathlib.Path(__file__).parent / "widget.js").read_text()
-    _css = "https://esm.sh/higlass@1.11/dist/hglib.css"
+    _esm = pathlib.Path(__file__).parent / "widget.js"
+    _css = "https://esm.sh/higlass@1.12/dist/hglib.css"
     _viewconf = t.Unicode("null").tag(sync=True)
 
     # readonly properties
