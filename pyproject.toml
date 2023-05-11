@@ -20,7 +20,8 @@ dependencies = [
 dev = [
     "black[jupyter]",
     "ruff",
-    "jupyterlab"
+    "jupyterlab",
+    "watchfiles",
 ]
 
 [project.urls]

@@ -4,35 +4,35 @@
 [![License](https://img.shields.io/pypi/l/gosling.svg?color=green)](https://github.com/higlass/higlass-widget/raw/main/LICENSE)
 [![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/higlass/higlass-widget/blob/main/notebooks/Widget.ipynb)
 
-
 ```
 pip install higlass-widget
 ```
 
 ### Development
 
-```bash
-pip install -e .
+This project uses [`hatch`](https://github.com/pypa/hatch), which installs and sync
+all dependencies from `pyproject.toml` automatically.
+
+```sh
+hatch shell
 ```
 
-If you are using the classic Jupyter Notebook you need to install the nbextension:
+Alternatively, you can create and manage your own virtual environments and install
+an editable version of `higlass-widget`:
 
-```bash
-jupyter nbextension install --py --symlink --sys-prefix higlass_widget
-jupyter nbextension enable --py --sys-prefix higlass_widget
+```sh
+pip install -e ".[dev]"
 ```
 
-Note for developers:
+Finally, you can now run the notebooks with:
 
-- the `-e` pip option allows one to modify the Python code in-place. Restart the kernel in order to see the changes.
-- the `--symlink` argument on Linux or OS X allows one to modify the JavaScript code in-place. This feature is not available with Windows.
-
-For developing with JupyterLab:
-
-```
-jupyter labextension develop --overwrite higlass_widget
+```sh
+jupyterlab
 ```
 
+`higlass_widget.HiGlassWidget` is built with [`anywidget`](https://github.com/manzt/anywidget).
+You can edit the contents of `higlass_widget/widget.js` and changes will be reflected automatically
+in your active Jupyter notebook.
 
 ### Release
 
