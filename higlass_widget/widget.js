@@ -28,13 +28,13 @@ export async function render({ model, el }) {
 			model.save_changes();
 		}, viewconf.views[0].uid);
 	} else {
-		viewconf.views.forEach((_view, idx) => {
+		viewconf.views.forEach((view, idx) => {
 			api.on("location", (loc) => {
 				let copy = model.get("location").slice();
 				copy[idx] = toPts(loc);
 				model.set("location", copy);
 				model.save_changes();
-			}, uid);
+			}, view.uid);
 		});
 	}
 }
