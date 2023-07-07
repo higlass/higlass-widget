@@ -12,11 +12,11 @@ function toPts({ xDomain, yDomain }) {
 	return [x, xe, y, ye];
 }
 
-export async function render(view) {
-	let viewconf = JSON.parse(view.model.get("_viewconf"));
-	let api = await hglib.viewer(view.el, viewconf);
+export async function render({ model, el }) {
+	let viewconf = JSON.parse(model.get("_viewconf"));
+	let api = await hglib.viewer(el, viewconf);
 
-	view.model.on("msg:custom", (msg) => {
+	model.on("msg:custom", (msg) => {
 		msg = JSON.parse(msg);
 		let [fn, ...args] = msg;
 		api[fn](...args);
@@ -24,17 +24,17 @@ export async function render(view) {
 
 	if (viewconf.views.length === 1) {
 		api.on("location", (loc) => {
-			view.model.set("location", toPts(loc));
-			view.model.save_changes();
+			model.set("location", toPts(loc));
+			model.save_changes();
 		}, viewconf.views[0].uid);
 	} else {
-		viewconf.views.forEach((view, idx) => {
+		viewconf.views.forEach((_view, idx) => {
 			api.on("location", (loc) => {
-				let copy = view.model.get("location").slice();
+				let copy = model.get("location").slice();
 				copy[idx] = toPts(loc);
-				view.model.set("location", copy);
-				view.model.save_changes();
-			}, view.uid);
+				model.set("location", copy);
+				model.save_changes();
+			}, uid);
 		});
 	}
 }
