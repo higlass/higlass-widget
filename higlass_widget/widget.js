@@ -1,4 +1,4 @@
-import hglib from "https://esm.sh/higlass@1.12?deps=react@17,react-dom@17,pixi.js@6"
+import hglib from "https://esm.sh/higlass@1.12?deps=react@17,react-dom@17,pixi.js@6";
 
 /**
  * @param {{
@@ -7,34 +7,44 @@ import hglib from "https://esm.sh/higlass@1.12?deps=react@17,react-dom@17,pixi.j
  * }} location
  */
 function toPts({ xDomain, yDomain }) {
-	let [x, xe] = xDomain;
-	let [y, ye] = yDomain;
-	return [x, xe, y, ye];
+  let [x, xe] = xDomain;
+  let [y, ye] = yDomain;
+  return [x, xe, y, ye];
 }
 
 export async function render({ model, el }) {
-	let viewconf = JSON.parse(model.get("_viewconf"));
-	let api = await hglib.viewer(el, viewconf);
+  let viewconf = JSON.parse(model.get("_viewconf"));
+  let auth_token = model.get("_auth_token");
 
-	model.on("msg:custom", (msg) => {
-		msg = JSON.parse(msg);
-		let [fn, ...args] = msg;
-		api[fn](...args);
-	});
+  let api = await hglib.viewer(el, viewconf, { authToken: auth_token });
 
-	if (viewconf.views.length === 1) {
-		api.on("location", (loc) => {
-			model.set("location", toPts(loc));
-			model.save_changes();
-		}, viewconf.views[0].uid);
-	} else {
-		viewconf.views.forEach((view, idx) => {
-			api.on("location", (loc) => {
-				let copy = model.get("location").slice();
-				copy[idx] = toPts(loc);
-				model.set("location", copy);
-				model.save_changes();
-			}, view.uid);
-		});
-	}
+  model.on("msg:custom", (msg) => {
+    msg = JSON.parse(msg);
+    let [fn, ...args] = msg;
+    api[fn](...args);
+  });
+
+  if (viewconf.views.length === 1) {
+    api.on(
+      "location",
+      (loc) => {
+        model.set("location", toPts(loc));
+        model.save_changes();
+      },
+      viewconf.views[0].uid
+    );
+  } else {
+    viewconf.views.forEach((view, idx) => {
+      api.on(
+        "location",
+        (loc) => {
+          let copy = model.get("location").slice();
+          copy[idx] = toPts(loc);
+          model.set("location", copy);
+          model.save_changes();
+        },
+        view.uid
+      );
+    });
+  }
 }

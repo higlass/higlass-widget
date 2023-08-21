@@ -11,11 +11,15 @@ class HiGlassWidget(anywidget.AnyWidget):
     _css = "https://esm.sh/higlass@1.12/dist/hglib.css"
     _viewconf = t.Unicode("null").tag(sync=True)
 
+    _auth_token = t.Unicode().tag(sync=True)
+
     # readonly properties
     location = t.List(t.Union([t.Float(), t.Tuple()]), read_only=True).tag(sync=True)
 
-    def __init__(self, viewconf: dict, **kwargs):
-        super().__init__(_viewconf=json.dumps(viewconf), **kwargs)
+    def __init__(self, viewconf: dict, auth_token=None, **kwargs):
+        super().__init__(
+            _viewconf=json.dumps(viewconf), _auth_token=auth_token, **kwargs
+        )
 
     def reload(self, *items):
         msg = json.dumps(["reload", items])
