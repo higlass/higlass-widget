@@ -1,3 +1,5 @@
+This project is now deprecated. Please use [`higlass-python`](https://github.com/higlass/higlass-python)!
+
 # higlass-widget
 
 [![PyPI](https://img.shields.io/pypi/v/higlass-widget.svg?color=green)](https://pypi.org/project/higlass-widget)
